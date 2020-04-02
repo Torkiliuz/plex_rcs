@@ -89,8 +89,8 @@ def tailf(logfile):
         # Use cache backend
         for line in tailer.follow(open(logfile)):
             if re.match(r".*(mkv:|mp4:|mpeg4:|avi:) received cache expiry notification", line):
-                f = re.sub(
-                    r"^(.*rclone\[[0-9]+\]: )([^:]*)(:.*)$", r'\2', line)
+                search = re.search(r'^[0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} INFO  : (.*): received cache expiry notification', line, re.IGNORECASE)
+                f = search.group(1)
                 print("Detected new file: {0}".format(f))
                 scan(os.path.dirname(f))
 

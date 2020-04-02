@@ -1,3 +1,3 @@
-plexapi
-pyyaml
-tailer
+plexapi==3.3.0
+pyyaml==5.3.1
+tailer==0.4.1

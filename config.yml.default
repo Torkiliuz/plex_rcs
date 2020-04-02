@@ -29,13 +29,14 @@ plex_rcs:
   host: localhost
   port: 32400
   token: TOKEN
-  backend: vfs
+  backend: cache
   docker: true
   container: plex
-  media_root: /media
+  media_root: /mnt/unionfs
+  log_file: "/var/lib/rclone/rclone.log"
   env:
     LD_LIBRARY_PATH: "/usr/lib/plexmediaserver"
-    PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR: "/var/lib/plexmediaserver"
+    PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR: "/var/lib/plexmediaserver/Library/Application Support"
 
 ## Windows Config, comment out config above and uncomment this.
 # plex_rcs:
