@@ -9,43 +9,37 @@ import argparse
 import yaml
 import time
 from datetime import datetime
-from subprocess import call
+from multiprocessing import Pool
+from subprocess import run
 from plexapi.myplex import PlexServer
 import tailer
 
 
 def config(file):
-    global plex, cfg
+    global servers, cfg
 
     with open(file, 'r') as ymlfile:
         cfg = yaml.load(ymlfile,Loader=yaml.FullLoader)['plex_rcs']
 
-    try:
-        plex = PlexServer(
-            "http://{0}:{1}".format(cfg['host'], cfg['port']), cfg['token'])
-        if args.test:
-            print("Config OK. Successfully connected to Plex server on {0}:{1}".format(
-                cfg['host'], cfg['port']))
-    except:
-        sys.exit("Failed to connect to plex server {0}:{1}.".format(
-            cfg['host'], cfg['port']))
+    servers = []
+    for server in cfg['servers']:
+        try:
+            plex = PlexServer(
+                "http://{0}:{1}".format(server['host'], server['port']), server['token'])
+            servers.append(plex)
+        except:
+            sys.exit("Failed to connect to plex server {0}:{1}.".format(
+                server['host'], server['port']))
             
 def build_sections():
     global paths
 
     # Build our library paths dictionary
-    for section in plex.library.sections():
-        for l in plex.library.section(section.title).locations:
+    for section in servers[0].library.sections():
+        for l in servers[0].library.section(section.title).locations:
             paths.update({l: section.key})
 
-
 def scan(folder):
-
-    # if cfg['media_root'].rstrip("\\").rstrip("/") in folder:
-    #     directory = args.directory
-    #     print("directory: '{0}'".format(
-    #         directory))
-    # else:
     directory = os.path.abspath("{0}/{1}".format(cfg['media_root'].rstrip("\\").rstrip("/"), folder))
 
     # Match the new file with a path in our library
@@ -56,58 +50,31 @@ def scan(folder):
         if p in directory:
             found = True
             section_id = paths[p]
-            print("Processing section {0}, folder: {1}".format(
-                section_id, directory))
+            print("Processing section {0}, folder: {1}".format(section_id, directory))
 
-            if cfg['docker']:
+            for server in servers:
                 try:
-                    call(["/usr/bin/docker", "exec", "-it", cfg['container'], "bash", "-c",
-                          "export LD_LIBRARY_PATH=/usr/lib/plexmediaserver/lib;/usr/lib/plexmediaserver/Plex\ Media\ Scanner" " --scan" " --refresh" " --section {0} --directory '{1}'".format(section_id, directory)])
+                    # Use run for non-blocking
+                    run(["/usr/bin/docker", "exec", "-it", server['container'], "bash", "-c",
+                            "export LD_LIBRARY_PATH=/usr/lib/plexmediaserver/lib;/usr/lib/plexmediaserver/Plex\ Media\ Scanner" " --scan" " --refresh" " --section {0} --directory '{1}'".format(section_id, directory)])
                 except:
                     print("Error executing docker command")
-            else:
-                os.environ['LD_LIBRARY_PATH'] = os.path.expandvars(cfg['env']['LD_LIBRARY_PATH'])
-                os.environ['PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR'] = os.path.expandvars(cfg['env']['PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR'])
-                try:
-                    call(["{0}/Plex Media Scanner".format(os.path.expandvars(cfg['env']['LD_LIBRARY_PATH'])), "--scan",
-                          "--refresh", "--section", section_id, "--directory", directory], env=os.environ)
-                except:
-                    print(
-                        "Error executing {0}/Plex Media Scanner".format(os.path.expandvars(cfg['env']['LD_LIBRARY_PATH'])))
 
     if not found:
-        print("Scanned directory '{0}' not found in Plex library".format(
-            directory))
+        print("Scanned directory '{0}' not found in Plex library".format(directory))
 
 
 def tailf(logfile):
     print("Starting to monitor {0} with pattern for rclone {1}".format(
         logfile, cfg['backend']))
 
-    # Validate which backend we're using
-    if cfg['backend'] == 'cache':
-        # Use cache backend
-        for line in tailer.follow(open(logfile)):
-            if re.match(r".*(mkv:|mp4:|mpeg4:|avi:) received cache expiry notification", line):
-                search = re.search(r'^[0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} INFO  : (.*): received cache expiry notification', line, re.IGNORECASE)
+    for line in tailer.follow(open(logfile)):
+        if re.match(r".*(mkv:|mp4:|mpeg4:|avi:) received cache expiry notification", line):
+            search = re.search(r'^[0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} INFO  : (.*): received cache expiry notification', line, re.IGNORECASE)
+            if search is not None:
                 f = search.group(1)
                 print("Detected new file: {0}".format(f))
                 scan(os.path.dirname(f))
-
-    elif cfg['backend'] == 'vfs':
-        # Use vfs backend
-        timePrev = ''
-        for line in tailer.follow(open(logfile)):
-            if re.match(r".*\:\sinvalidating directory cache", line):
-                files = re.search(r"\:\s(.*)\:", line)
-                f = files.group(1)
-                timeCurr = re.sub(
-                    r"^.*\s(\d+:\d+:\d+)\s.*\s:\s.*\:\sinvalidating directory cache", r'\1', line)
-
-                if timeCurr != timePrev:
-                    print("Detected directory cache expiration: {0}".format(f))
-                    scan(f)
-                    timePrev = timeCurr
 
 def find_log():
     if args.logfile:
@@ -153,7 +120,6 @@ if __name__ == "__main__":
             print("Configuration file '{0}' does not exist.".format(
                 os.path.dirname(os.path.realpath(__file__))))
             sys.exit(1)
-
     # Main
     if args.test:
         config(cf)
