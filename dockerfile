@@ -4,4 +4,4 @@ RUN mkdir /plex_rcs /nas && cd /plex_rcs && wget https://raw.githubusercontent.c
 
 RUN chmod 755 /plex_rcs/entrypoint.sh && pip install -r /plex_rcs/requirements.txt 
 
-CMD [ "/plex_rcs/entrypoint.sh" ]
+CMD [ "python /plex_rcs/plex_rcs.py" ]
