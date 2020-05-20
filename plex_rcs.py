@@ -56,7 +56,7 @@ def scan(folder):
                 try:
                     # Use run for non-blocking
                     run(["/usr/bin/docker", "exec", "-it", server['container'], "bash", "-c",
-                            "export LD_LIBRARY_PATH=/usr/lib/plexmediaserver/lib;/usr/lib/plexmediaserver/Plex\ Media\ Scanner" " --scan" " --refresh" " --section {0} --directory '{1}'".format(section_id, directory)])
+                            "/usr/lib/plexmediaserver/Plex\ Media\ Scanner --scan --refresh --section {0} --directory '{1}'".format(section_id, directory)])
                 except:
                     print("Error executing docker command")
 
