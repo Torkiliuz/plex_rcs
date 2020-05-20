@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 
 copy plex_rcs.py plex_rcs.py
 
-CMD ["python", "/app/plex_rcs.py --config=/app/config/plex_rcs.yml --logfile=/app/config/rclone.log"]
+CMD ["python", "/app/plex_rcs.py", "--config=/app/config/plex_rcs.yml", "--logfile=/app/config/rclone.log"]
