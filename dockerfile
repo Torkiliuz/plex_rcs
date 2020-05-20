@@ -1,4 +1,4 @@
-FROM python:3-alpine
+FROM python:3
 
 RUN mkdir /plex_rcs /nas && cd /plex_rcs && wget https://raw.githubusercontent.com/mattmac24/plex_rcs/master/plex_rcs.py && wget https://raw.githubusercontent.com/mattmac24/plex_rcs/master/requirements.txt
 
