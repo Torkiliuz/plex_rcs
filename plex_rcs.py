@@ -132,5 +132,7 @@ if __name__ == "__main__":
     else:
         config(cf)
         lf = find_log()
+        print("Found rclone logfile: {0}".format(lf))
         build_sections()
+        print("Import of libraries from Plex complete. Starting up...")
         tailf(lf)
