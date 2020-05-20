@@ -69,7 +69,7 @@ def tailf(logfile):
         logfile, cfg['backend']))
 
     for line in tailer.follow(open(logfile)):
-        if re.match(r".*(mkv:|mp4:|mpeg4:|avi:) received cache expiry notification", line):
+        if re.match(r".*(mkv:|mp4:|mpeg4:|avi:)*cache expired", line):
             search = re.search(r'^[0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} INFO  : (.*): received cache expiry notification', line, re.IGNORECASE)
             if search is not None:
                 f = search.group(1)
