@@ -55,8 +55,7 @@ def scan(folder):
             for server in servers:
                 try:
                     # Use run for non-blocking
-                    run(["/usr/bin/docker", "exec", "-i", cfg['container'], "/usr/lib/plexmediaserver/Plex Media Scanner", "--scan", "--refresh", "--section", section_id, "--directory", directory])
-                    print(["/usr/bin/docker", "exec", "-i", cfg['container'], "/usr/lib/plexmediaserver/Plex Media Scanner", "--scan", "--refresh", "--section", section_id, "--directory", directory])
+                    run(["/usr/bin/docker", "exec", "-i", "plex", "/usr/lib/plexmediaserver/Plex Media Scanner", "--scan", "--refresh", "--section", section_id, "--directory", directory])
                 except:
                     print("Error executing docker command")
 
