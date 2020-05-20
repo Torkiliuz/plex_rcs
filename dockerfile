@@ -1,7 +1,11 @@
-FROM python:3
+FROM python:3.6
 
-RUN mkdir /plex_rcs /nas && cd /plex_rcs && wget https://raw.githubusercontent.com/mattmac24/plex_rcs/master/plex_rcs.py && wget https://raw.githubusercontent.com/mattmac24/plex_rcs/master/requirements.txt
+WORKDIR /app
 
-RUN pip install -r /plex_rcs/requirements.txt
+COPY requirements.txt  requirements.txt 
 
-CMD [ "python", "/plex_rcs/plex_rcs.py" ]
+RUN pip install -r requirements.txt 
+
+copy plex_rcs.py plex_rcs.py
+
+CMD python plex_rcs.py --config=/app/config/plex_rcs.yml --logfile=/app/config/rclone.log
