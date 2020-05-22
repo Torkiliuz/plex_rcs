@@ -9,4 +9,4 @@ RUN apt-get -yqq update && apt-get -yqq install docker.io
 
 copy plex_rcs.py plex_rcs.py
 
-CMD ["python", "/app/plex_rcs.py", "--config=/app/config/config.yml", "--logfile=/app/config/rclone.log", ">> /proc/1/fd/1"]
+CMD ["python", "/app/plex_rcs.py", "--config=/app/config/config.yml", "--logfile=/app/config/rclone.log"]
