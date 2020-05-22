@@ -14,7 +14,7 @@ from subprocess import run
 from plexapi.myplex import PlexServer
 import tailer
 
-sys.stdout = open("/app/plex_rcs.log", "w+")
+sys.stdout = open("/app/plex_rcs.log", "wt")
 
 def config(file):
     global servers, cfg
