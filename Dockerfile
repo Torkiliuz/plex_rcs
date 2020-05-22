@@ -6,6 +6,7 @@ COPY requirements.txt  requirements.txt
 
 RUN pip install -r requirements.txt 
 RUN apt-get -yqq update && apt-get -yqq install docker.io
+RUN ln -sf /dev/stdout /app/plex_rcs.log
 
 copy plex_rcs.py plex_rcs.py
 
