@@ -1,0 +1,27 @@
+version: "2.4"
+
+########################### NETWORKS
+networks:
+  t2_proxy:
+    external:
+      name: t2_proxy
+  default:
+    driver: bridge
+
+########################### SERVICES
+services:
+
+plex_rcs:
+    build:
+      context: https://github.com/mattmac24/plex_rcs.git
+    container_name: plex_rcs
+    restart: unless-stopped
+    networks:
+      - t2_proxy
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - $DOCKER_ROOT/plex_rcs/config.yml:/app/config/config.yml
+      - $DOCKER_ROOT/rclone/config/rclone.log:/app/config/rclone.log
+    depends_on:
+      plex:
+        condition: service_healthy
