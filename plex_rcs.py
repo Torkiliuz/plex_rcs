@@ -23,13 +23,16 @@ def config(file):
 
     servers = []
     for server in cfg['servers']:
-        try:
-            plex = PlexServer(
-                "http://{0}:{1}".format(server['host'], server['port']), server['token'])
-            servers.append(plex)
-        except:
-            sys.exit("Failed to connect to plex server {0}:{1}.".format(
-                server['host'], server['port']))
+        for i in range(0,100):
+            while True:
+                try:
+                    plex = PlexServer("http://{0}:{1}".format(server['host'], server['port']), server['token'])
+                    servers.append(plex)
+                except:
+                    print("Failed to connect to plex server {0}:{1}. Sleeping 5 seconds before retry".format(server['host'], server['port']))
+                    time.sleep(5)
+                    continue
+                break
             
 def build_sections():
     global paths
@@ -127,7 +130,6 @@ if __name__ == "__main__":
                 os.path.dirname(os.path.realpath(__file__))))
             sys.exit(1)
     # Main
-    time.sleep(120)
     if args.test:
         config(cf)
         find_log()
