@@ -14,7 +14,6 @@ from subprocess import run
 from plexapi.myplex import PlexServer
 import tailer
 
-sys.stdout = open("/app/plex_rcs.log", "wt")
 
 def config(file):
     global servers, cfg
@@ -24,16 +23,13 @@ def config(file):
 
     servers = []
     for server in cfg['servers']:
-        for i in range(0,100):
-            while True:
-                try:
-                    plex = PlexServer("http://{0}:{1}".format(server['host'], server['port']), server['token'])
-                    servers.append(plex)
-                except:
-                    print("Failed to connect to plex server {0}:{1}. Sleeping 5 seconds before retry".format(server['host'], server['port']))
-                    time.sleep(5)
-                    continue
-                break
+        try:
+            plex = PlexServer(
+                "http://{0}:{1}".format(server['host'], server['port']), server['token'])
+            servers.append(plex)
+        except:
+            sys.exit("Failed to connect to plex server {0}:{1}.".format(
+                server['host'], server['port']))
             
 def build_sections():
     global paths
@@ -73,18 +69,18 @@ def tailf(logfile):
 
     for line in tailer.follow(open(logfile)):
         if re.match(r".*cache expired", line):
-            search = re.search(r'^.*INFO\s*:\s(.*):\sput: cache expired', line, re.IGNORECASE)
+            search = re.search(r'^.*INFO\s\s:\s(.*):\s.*: cache expired', line, re.IGNORECASE)
             if search is not None:
                 f = search.group(1)
                 print("Detected new file: {0}".format(f))
-                scan(os.path.dirname(f))
+                scan(f)
                 
         if re.match(r".*received cache expiry notification", line):
-            search = re.search(r'^.*INFO\s*:\s(.*):\sreceived cache expiry notification', line, re.IGNORECASE)
+            search = re.search(r'^.*INFO\s\s:\s(.*):\sreceived cache expiry notification', line, re.IGNORECASE)
             if search is not None:
                 f = search.group(1)
                 print("Detected new file: {0}".format(f))
-                scan(os.path.dirname(f))
+                scan(f)
 
 def find_log():
     if args.logfile:
