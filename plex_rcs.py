@@ -64,16 +64,30 @@ def scan(folder):
 
 
 def tailf(logfile):
-    print("Starting to monitor {0} with pattern for rclone {1}".format(
-        logfile, cfg['backend']))
+	print("Starting to monitor {0} with pattern for rclone {1}".format(logfile, cfg['backend']))
 
-    for line in tailer.follow(open(logfile)):
-        if re.match(r".*cache expired", line):
-            search = re.search(r'^.*INFO\s\s:\s(.*):\s.*: cache expired', line, re.IGNORECASE)
-            if search is not None:
-                f = search.group(1)
-                print("Detected new file: {0}".format(f))
-                scan(f)
+	# Validate which backend we're using
+	if cfg['backend'] == 'cache':
+		# Use cache backend
+		for line in tail("-Fn0", logfile, _iter=True):
+			if re.match(r".*(mkv:|mp4:|mpeg4:|avi:) received cache expiry notification", line):
+				f = re.sub(r"^(.*rclone\[[0-9]+\]: )([^:]*)(:.*)$",r'\2', line)
+				print("Detected new file: {0}".format(f))
+				scan(os.path.dirname(f))
+
+	elif cfg['backend'] == 'vfs':
+		# Use vfs backend
+		timePrev = ''
+		for line in tail("-Fn0", logfile, _iter=True):
+			if re.match(r".*: invalidating directory cache", line):
+				files = re.search(r": (.*)\:", line)
+                f = files.group(1)
+				timeCurr = re.sub(r"^.*\s([0-9]+:[0-9]+:[0-9]+)\s.*\s:\s.*:\sinvalidating directory cache",r'\1', line)
+
+				if timeCurr != timePrev:
+					print("Detected directory cache expiration: {0}".format(f))
+					scan(os.path.dirname(f))
+					timePrev = timeCurr
 
 def find_log():
     if args.logfile:
