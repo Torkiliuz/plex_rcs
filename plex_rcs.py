@@ -74,13 +74,6 @@ def tailf(logfile):
                 f = search.group(1)
                 print("Detected new file: {0}".format(f))
                 scan(f)
-                
-        if re.match(r".*received cache expiry notification", line):
-            search = re.search(r'^.*INFO\s\s:\s(.*):\sreceived cache expiry notification', line, re.IGNORECASE)
-            if search is not None:
-                f = search.group(1)
-                print("Detected new file: {0}".format(f))
-                scan(f)
 
 def find_log():
     if args.logfile:
