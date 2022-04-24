@@ -12,7 +12,7 @@ This is useful for people who run Plex Media Server on a different server than S
 
 ## Installation
 
-1. Clone this repo: `git clone https://github.com/beyondmeat/plex_rcs.git`
+1. Clone this repo: `git clone https://github.com/Torkiliuz/plex_rcs.git`
 2. Install the requirements: `pip3 install -r requirements.txt`
 
 ## Configuration
@@ -25,13 +25,6 @@ This is useful for people who run Plex Media Server on a different server than S
 ## Running plex_rcs
 
 Using `screen` or using the included `plex_rcs.service` systemd service
-
-### Using Windows:
-Use nssm to create a service.
-
-Example rclone mount for windows:
-
-`mount gdrive:/ g: --user-agent="myuseragent/v1" --drive-skip-gdocs --timeout=30m --allow-other --dir-cache-time=72h --config "d:\rclone\rclone.conf" -o UserName=MYUSERNAME -o GroupName=Users --log-level=DEBUG --log-file=d:\plex_rcs\rclone.log`
 
 ### Using Linux
 
@@ -55,47 +48,3 @@ Execute the program using screen:
 `/usr/bin/screen -dmS plexrcs /path/to/plex_rcs/plex_rcs.py`
 
 To view the console: `screen -r plexrcs`
-
-## More info on `media_root` configuration setting
-
-This setting may be tricky to figure out at the first glance, but it is critical to get `plex_rcs` working properly. 
-
-The value of this setting is the folder **inside your docker container** (if using docker) that contains all your media. Typically, this would be in `/media` or `/data/media` or `/data`. If not using docker, this will likely be the path to your rclone mount, i.e.: `/mnt/media` or `g:\`
-
-At this time there is 1 requirement:
-
-The root of your rclone remote (i.e.: `gdrive:`) **must** contain all your media in sub-folders, so that the remote and the folder that is mounted inside your docker container/on your system both contain the same sub-folders.
-
-**How to test:**
-
-1. `rclone lsd gdrive:` and
-2. `docker exec -ti plex ls /media` (where `/media` is where your media is located inside your docker container)
-3. If not using docker, `ls /path/to/rclone/cache/mount`
-
-If the result of these two folders yield the same sub-folders, then `plex_rcs` will work correctly.
-
-**What won't work**
-
-1. `rclone lsd cache:` shows many different folders, not just media sub-folders
-2. You've mounted the `cache:` remote to `/mnt/media` using something like `rclone mount gdrive:Media /mnt/media`
-2. `docker exec -ti plex ls /media` shows only your media sub-folders
-
-## Testing
-
-You can test `plex_rcs` if you use the built in /var/log/syslog monitoring by executing the following command (replace `tvshows` and the series/episode by your values):
-
-### vfs mount
-You must use a --log-file
-Paste this at the end of the log file: (replace with valid path)
-`2020/01/22 22:08:19 DEBUG : media/tv/Good Trouble (2019)/Season 2: invalidating directory cache`
-### cache mount
-`logger "Apr 21 07:20:51 plex rclone[21009]: tvshows/Survivor/Season 20/Survivor - S20E01 - Episode.mkv: received cache expiry notification"`
-
-If you're monitoring the `plex_rcs` console, you should see activity:
-
-```
-Starting to monitor /var/log/syslog with pattern for rclone                                                             
-Match found: tvshows/Survivor/Season 20/Survivor - S20E01 - Episode.mkv
-Processing section 1, folder: /media/tvshows/Survivor/Season 20
-GUI: Scanning Survivor/Season 20
-```
