@@ -43,7 +43,7 @@ def scan(folder):
     directory = os.path.abspath("{0}/{1}".format(cfg['media_root'].rstrip("\\").rstrip("/"), folder))
 
     # Match the new file with a path in our library
-    # and trigger a scan via a `docker exec` call
+    # and trigger a scan via a 'Plex Media Scanner' call
     found = False
 
     for p in paths:
@@ -55,9 +55,9 @@ def scan(folder):
             for server in servers:
                 try:
                     # Use run for non-blocking
-                    run(["/usr/bin/docker", "exec", "-i", "plex", "/usr/lib/plexmediaserver/Plex Media Scanner", "--scan", "--refresh", "--section", section_id, "--directory", directory])
+                    run(["/usr/lib/plexmediaserver/Plex Media Scanner", "--scan", "--refresh", "--section", section_id, "--directory", directory])
                 except:
-                    print("Error executing docker command")
+                    print("Error executing command")
 
     if not found:
         print("Scanned directory '{0}' not found in Plex library".format(directory))

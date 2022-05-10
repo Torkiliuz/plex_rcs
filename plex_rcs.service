@@ -1,13 +1,17 @@
 [Unit]
 Description=plex_rcs
+Requires=plexmediaserver.service
+After=plexmediaserver.service
 Requires=plex_rcs.service
 After=plex_rcs.service
-RequiresMountsFor=/mnt/media
+RequiresMountsFor=/files
 
 [Service]
 User=1000
 Group=1000
 Type=simple
+Environment=LD_LIBRARY_PATH=/usr/lib/plexmediaserver:/usr/lib/plexmediaserver/lib
+Environment=PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR="/plex/Library/Application Support"
 ExecStart=/opt/plex_rcs/plex_rcs.py
 TimeoutStopSec=20
 KillMode=process

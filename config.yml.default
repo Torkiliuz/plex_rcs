@@ -1,16 +1,11 @@
 plex_rcs:
   servers:
     - host: localhost
-      port: 32401
+      port: 32400
       token: TOKEN
-      container: plex1
-    - host: localhost
-      port: 32402
-      token: TOKEN
-      container: plex2
-  backend: cache
+  backend: vfs
   media_root: /mnt/unionfs
   log_file: "/var/lib/rclone/rclone.log"
   env:
-    LD_LIBRARY_PATH: "/usr/lib/plexmediaserver"
+    LD_LIBRARY_PATH: "/usr/lib/plexmediaserver/lib"
     PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR: "/var/lib/plexmediaserver/Library/Application Support"
