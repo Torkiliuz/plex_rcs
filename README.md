@@ -20,7 +20,7 @@ This is useful for people who run Plex Media Server on a different server than S
 
 
 1. Copy the `config.yml.default` to `config.yml`
-2. Edit `config.yml` to include your [X-Plex-Token](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/), set your `media_root` setting and any other settings. _See below for more information on the `media_root` setting_.
+2. Edit `config.yml` to include your [X-Plex-Token](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/), set your `media_root` setting and any other settings.
 
 ## Running plex_rcs
 
